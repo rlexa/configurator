@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Configurator
+﻿namespace Configurator
 {
     /// <summary>This is the main entry point for creating and populating a configuration context.</summary>
     public interface IContextLoader

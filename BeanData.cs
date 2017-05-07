@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Configurator
 {
@@ -94,18 +90,14 @@ namespace Configurator
         public object valueAssign = null;
 
         /// <summary>Returns property or null by "name".</summary>
-        public BeanProperty getProperty(string name)
-        {
+        public BeanProperty getProperty(string name) {
             return getProperty(props, name);
         }
 
         /// <summary>Returns property or null from "props" by "name".</summary>
-        static public BeanProperty getProperty(List<BeanProperty> props, string name)
-        {
-            if (props != null)
-            {
-                foreach (BeanProperty prop in props)
-                {
+        static public BeanProperty getProperty(List<BeanProperty> props, string name) {
+            if (props != null) {
+                foreach (BeanProperty prop in props) {
                     if (prop.name == name)
                         return prop;
                 }

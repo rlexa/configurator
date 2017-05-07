@@ -1,14 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+using System.IO;
 
 namespace Configurator
 {
     /// <summary>This is the main entry point for creating and populating a configuration context from JSON.</summary>
-    public class ContextLoaderJson : IContextLoader
+    public class ContextLoaderJson: IContextLoader
     {
         /// <summary>Recursive importing of files (expects a string or an array of strings and/or objects).</summary>
         public const string JSONTAG_IMPORT = "import";
@@ -76,8 +74,7 @@ namespace Configurator
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        public IContext loadContext(string path)
-        {
+        public IContext loadContext(string path) {
             return string.IsNullOrWhiteSpace(path) ? null : mergeContext(path, new Context(), null);
         }
 
@@ -87,15 +84,13 @@ namespace Configurator
         /// <param name="context"></param>
         /// <param name="path"></param>
         /// <returns></returns>
-        public IContext loadContext(IContext context, string path)
-        {
+        public IContext loadContext(IContext context, string path) {
             if (!string.IsNullOrWhiteSpace(path))
                 mergeContext(path, context, null);
             return context;
         }
 
-        private IContext mergeContext(string path, IContext context, CurrentConfiguration cfg)
-        {
+        private IContext mergeContext(string path, IContext context, CurrentConfiguration cfg) {
             if (cfg == null)
                 cfg = new CurrentConfiguration();
             cfg.colPaths.Add(path);
@@ -103,51 +98,43 @@ namespace Configurator
             Context.Log(this, "loading '" + cfg.strCurPath);
 
             Dictionary<string, object> dctJson = null;
-            try
-            {
-                using (System.IO.StreamReader stream = new System.IO.StreamReader(path))
-                {
-                    using (JsonTextReader rdr = new JsonTextReader(stream))
-                    {
-                        object ret = parseJson(rdr);
-                        dctJson = ret as Dictionary<string, object>;
+            try {
+                using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read)) {
+                    using (var streamReader = new StreamReader(stream)) {
+                        using (var rdr = new JsonTextReader(streamReader)) {
+                            var ret = parseJson(rdr);
+                            dctJson = ret as Dictionary<string, object>;
+                        }
                     }
                 }
+            } catch (Exception ex) {
+                throw new ConfiguratorException("Parsing JSON threw an exception.", ex);
             }
-            catch (Exception ex) { throw new ConfiguratorException("Parsing JSON threw an exception.", ex); }
             if (dctJson != null)
                 mergeContext(cfg, dctJson, context);
             return context;
         }
 
-        private object parseJson(string json)
-        {
-            using (System.IO.StringReader sr = new System.IO.StringReader(json))
-            {
-                using (JsonTextReader rdr = new JsonTextReader(sr))
-                {
+        private object parseJson(string json) {
+            using (var sr = new StringReader(json)) {
+                using (var rdr = new JsonTextReader(sr)) {
                     return parseJson(rdr);
                 }
             }
         }
 
-        private object parseJson(JsonTextReader rdr)
-        {
-            while (rdr.TokenType == JsonToken.None || rdr.TokenType == JsonToken.Comment)
-            {
+        private object parseJson(JsonTextReader rdr) {
+            while (rdr.TokenType == JsonToken.None || rdr.TokenType == JsonToken.Comment) {
                 if (!rdr.Read())
                     break;
             }
-            if (rdr.TokenType == JsonToken.StartObject)
-            {
+            if (rdr.TokenType == JsonToken.StartObject) {
                 int curDepth = rdr.Depth;
                 Dictionary<string, object> ret = new Dictionary<string, object>();
-                while (rdr.Read())
-                {
+                while (rdr.Read()) {
                     if (rdr.Depth <= curDepth && rdr.TokenType == JsonToken.EndObject)
                         break;
-                    if (rdr.TokenType == JsonToken.PropertyName)
-                    {
+                    if (rdr.TokenType == JsonToken.PropertyName) {
                         string key = rdr.Value.ToString();
                         rdr.Read();
                         object val = parseJson(rdr);
@@ -155,13 +142,10 @@ namespace Configurator
                     }
                 }
                 return ret;
-            }
-            else if (rdr.TokenType == JsonToken.StartArray)
-            {
+            } else if (rdr.TokenType == JsonToken.StartArray) {
                 int curDepth = rdr.Depth;
                 List<object> ret = new List<object>();
-                while (rdr.Read())
-                {
+                while (rdr.Read()) {
                     if (rdr.Depth <= curDepth && rdr.TokenType == JsonToken.EndArray)
                         break;
                     object val = parseJson(rdr);
@@ -170,10 +154,8 @@ namespace Configurator
                 return ret;
             }
 
-            switch (rdr.TokenType)
-            {
-                case JsonToken.Float:
-                    {
+            switch (rdr.TokenType) {
+                case JsonToken.Float: {
                         Double dd = (double)rdr.Value;
                         return dd.ToString(System.Globalization.CultureInfo.InvariantCulture);
                     }
@@ -187,53 +169,37 @@ namespace Configurator
             return null;
         }
 
-        private IContext mergeContext(CurrentConfiguration cfg, Dictionary<string, object> dctJson, IContext context)
-        {
-            if (dctJson != null)
-            {
-                if (dctJson.ContainsKey(JSONTAG_BEANS))
-                {
+        private IContext mergeContext(CurrentConfiguration cfg, Dictionary<string, object> dctJson, IContext context) {
+            if (dctJson != null) {
+                if (dctJson.ContainsKey(JSONTAG_BEANS)) {
                     object beans = dctJson[JSONTAG_BEANS];
-                    if (beans != null)
-                    {
+                    if (beans != null) {
                         List<object> colJson = beans as List<object>;
-                        for (int ii = 0; ii < colJson.Count; ++ii)
-                        {
+                        for (int ii = 0; ii < colJson.Count; ++ii) {
                             object item = colJson[ii];
                             Dictionary<string, object> dctJsonBean = item as Dictionary<string, object>;
-                            if (dctJsonBean != null)
-                            {
-                                if (dctJsonBean.ContainsKey(JSONTAG_IMPORT))
-                                {
+                            if (dctJsonBean != null) {
+                                if (dctJsonBean.ContainsKey(JSONTAG_IMPORT)) {
                                     object imports = dctJsonBean[JSONTAG_IMPORT];
-                                    if (imports != null)
-                                    {
+                                    if (imports != null) {
                                         List<string> colJsonItems = new List<string>();
                                         List<bool> colJsonOptional = new List<bool>();
-                                        if (typeof(string) == imports.GetType())
-                                        {
+                                        if (typeof(string) == imports.GetType()) {
                                             colJsonItems.Add(imports as string);
                                             colJsonOptional.Add(false);
-                                        }
-                                        else
-                                        {
+                                        } else {
                                             List<object> colJsonRaw = imports as List<object>;
-                                            for (int jj = 0; jj < colJsonRaw.Count; ++jj)
-                                            {
+                                            for (int jj = 0; jj < colJsonRaw.Count; ++jj) {
                                                 object itemRaw = colJsonRaw[jj];
                                                 if (itemRaw == null)
                                                     continue;
-                                                if (typeof(string) == itemRaw.GetType())
-                                                {
+                                                if (typeof(string) == itemRaw.GetType()) {
                                                     colJsonItems.Add(itemRaw as string);
                                                     colJsonOptional.Add(false);
-                                                }
-                                                else
-                                                {
+                                                } else {
                                                     Dictionary<string, object> dctJsonRaw = itemRaw as Dictionary<string, object>;
                                                     if (dctJsonRaw.ContainsKey(JSONTAG_PROPERTY_IMPORT_PATH) && dctJsonRaw[JSONTAG_PROPERTY_IMPORT_PATH] != null
-                                                        && typeof(string) == dctJsonRaw[JSONTAG_PROPERTY_IMPORT_PATH].GetType())
-                                                    {
+                                                        && typeof(string) == dctJsonRaw[JSONTAG_PROPERTY_IMPORT_PATH].GetType()) {
                                                         colJsonItems.Add(dctJsonRaw[JSONTAG_PROPERTY_IMPORT_PATH] as string);
                                                         colJsonOptional.Add(dctJsonRaw.ContainsKey(JSONTAG_PROPERTY_IMPORT_OPTIONAL) && dctJsonRaw[JSONTAG_PROPERTY_IMPORT_OPTIONAL] != null
                                                             ? Boolean.Parse(dctJsonRaw[JSONTAG_PROPERTY_IMPORT_OPTIONAL] as string) : false);
@@ -241,19 +207,15 @@ namespace Configurator
                                                 }
                                             }
                                         }
-                                        for (int jj = 0; jj < colJsonItems.Count; ++jj)
-                                        {
+                                        for (int jj = 0; jj < colJsonItems.Count; ++jj) {
                                             string strPath = colJsonItems[jj];
                                             bool bOptional = colJsonOptional[jj];
-                                            if (!string.IsNullOrWhiteSpace(strPath))
-                                            {
-                                                if (!System.IO.Path.IsPathRooted(strPath))
-                                                {
+                                            if (!string.IsNullOrWhiteSpace(strPath)) {
+                                                if (!System.IO.Path.IsPathRooted(strPath)) {
                                                     string strCurDir = System.IO.Path.GetDirectoryName(cfg.strCurPath);
                                                     strPath = System.IO.Path.Combine(strCurDir, strPath);
                                                 }
-                                                if (!cfg.colPaths.Contains(strPath))
-                                                {
+                                                if (!cfg.colPaths.Contains(strPath)) {
                                                     if (!bOptional || System.IO.File.Exists(strPath))
                                                         mergeContext(strPath, context, cfg);
                                                     else
@@ -262,16 +224,11 @@ namespace Configurator
                                             }
                                         }
                                     }
-                                }
-                                else
-                                {
+                                } else {
                                     BeanData bean = null;
-                                    if (dctJsonBean.ContainsKey(JSONTAG_BEAN_IDMERGE))
-                                    {
+                                    if (dctJsonBean.ContainsKey(JSONTAG_BEAN_IDMERGE)) {
                                         bean = context.getBean(dctJsonBean[JSONTAG_BEAN_IDMERGE] as string);
-                                    }
-                                    else
-                                    {
+                                    } else {
                                         bean = new BeanData();
                                         context.addBean(bean);
                                     }
@@ -286,44 +243,34 @@ namespace Configurator
             return context;
         }
 
-        private IContext mergeContextBean(Dictionary<string, object> dctJson, BeanData bean, IContext context)
-        {
-            foreach (string key in dctJson.Keys)
-            {
+        private IContext mergeContextBean(Dictionary<string, object> dctJson, BeanData bean, IContext context) {
+            foreach (string key in dctJson.Keys) {
                 object val = dctJson[key];
-                if (key == JSONTAG_BEAN_ID && !string.IsNullOrWhiteSpace(val as string))
-                {
+                if (key == JSONTAG_BEAN_ID && !string.IsNullOrWhiteSpace(val as string)) {
                     bean.id = val as string;
                     context.registerBeanWithId(bean);
-                }
-                else if (key == JSONTAG_BEAN_CLASS && !string.IsNullOrWhiteSpace(val as string))
+                } else if (key == JSONTAG_BEAN_CLASS && !string.IsNullOrWhiteSpace(val as string))
                     bean.clss = val as string;
                 else if (key == JSONTAG_BEAN_PARENT && !string.IsNullOrWhiteSpace(val as string))
                     bean.id_parent = val as string;
                 else if (key == JSONTAG_BEAN_ABSTRACT && !string.IsNullOrWhiteSpace(val as string))
                     bean.is_abstract = Boolean.Parse(val as string);
-                else if (key == JSONTAG_BEAN_SCOPE && !string.IsNullOrWhiteSpace(val as string))
-                {
+                else if (key == JSONTAG_BEAN_SCOPE && !string.IsNullOrWhiteSpace(val as string)) {
                     if (val as string == JSONVAL_BEAN_SCOPE_PROTOTYPE)
                         bean.scope = BeanData.BeanScopeType.BST_PROTOTYPE;
                     else if (val as string == JSONVAL_BEAN_SCOPE_SINGLETON)
                         bean.scope = BeanData.BeanScopeType.BST_SINGLETON;
                     else
                         throw new ConfiguratorException("Bean scope <" + JSONTAG_BEAN_SCOPE + "> value '" + (val as string) + "' invalid.");
-                }
-                else if (key == JSONTAG_BEAN_PROPERTIES && val != null)
-                {
+                } else if (key == JSONTAG_BEAN_PROPERTIES && val != null) {
                     Dictionary<string, object> dctJsonProps = val as Dictionary<string, object>;
-                    foreach (string prop in dctJsonProps.Keys)
-                    {
+                    foreach (string prop in dctJsonProps.Keys) {
                         BeanData.BeanProperty property = new BeanData.BeanProperty();
                         property.name = prop;
                         context.addBeanProperty(bean, property);
                         mergeContextBeanPropertyAnon(dctJsonProps[prop], property, context);
                     }
-                }
-                else if (key == JSONTAG_BEAN_FACTORY && val != null)
-                {
+                } else if (key == JSONTAG_BEAN_FACTORY && val != null) {
                     BeanData.BeanProperty property = new BeanData.BeanProperty();
                     Dictionary<string, object> dctFactoryProps = val as Dictionary<string, object>;
                     if (dctFactoryProps.ContainsKey(JSONTAG_PROPERTY_FACTORY_METHOD) && !string.IsNullOrWhiteSpace(dctFactoryProps[JSONTAG_PROPERTY_FACTORY_METHOD] as string))
@@ -331,8 +278,7 @@ namespace Configurator
                     BeanData.BeanProperty.BeanValueCollection beanCol = new BeanData.BeanProperty.BeanValueCollection();
                     beanCol.type = BeanData.BeanProperty.BeanValueCollection.BeanValueCollectionType.BVCT_LIST;
                     property.value = beanCol;
-                    if (dctFactoryProps.ContainsKey(JSONTAG_PROPERTY_FACTORY_PARAMS) && dctFactoryProps[JSONTAG_PROPERTY_FACTORY_PARAMS] != null)
-                    {
+                    if (dctFactoryProps.ContainsKey(JSONTAG_PROPERTY_FACTORY_PARAMS) && dctFactoryProps[JSONTAG_PROPERTY_FACTORY_PARAMS] != null) {
                         List<object> colVals = dctFactoryProps[JSONTAG_PROPERTY_FACTORY_PARAMS] as List<object>;
                         Dictionary<string, object> dctVals = new Dictionary<string, object>();
                         for (int ii = 0; ii < colVals.Count; ++ii)
@@ -340,9 +286,7 @@ namespace Configurator
                         mergeContextBeanPropertyCollectionValue(dctVals, beanCol, context);
                     }
                     context.addBeanFactory(bean, property);
-                }
-                else if (key == JSONTAG_BEAN_ASSIGN)
-                {
+                } else if (key == JSONTAG_BEAN_ASSIGN) {
                     bean.valueAssign = val;
                 }
             }
@@ -350,45 +294,32 @@ namespace Configurator
             return context;
         }
 
-        private IContext mergeContextBeanPropertyAnon(object objJson, BeanData.BeanProperty property, IContext context)
-        {
+        private IContext mergeContextBeanPropertyAnon(object objJson, BeanData.BeanProperty property, IContext context) {
             if (objJson == null || objJson is string
                 || objJson is short || objJson is int || objJson is long
                 || objJson is float || objJson is double
-                || objJson is bool)
-            {
+                || objJson is bool) {
                 property.type = BeanData.BeanProperty.BeanPropertyType.BPT_SIMPLE;
                 property.value = objJson;
-            }
-            else
-            {
+            } else {
                 return mergeContextBeanProperty(objJson as Dictionary<string, object>, property, context);
             }
             return context;
         }
 
-        private IContext mergeContextBeanProperty(Dictionary<string, object> dctJson, BeanData.BeanProperty property, IContext context)
-        {
-            if (dctJson.ContainsKey(JSONTAG_PROPERTY_REFERENCE))
-            {
+        private IContext mergeContextBeanProperty(Dictionary<string, object> dctJson, BeanData.BeanProperty property, IContext context) {
+            if (dctJson.ContainsKey(JSONTAG_PROPERTY_REFERENCE)) {
                 property.type = BeanData.BeanProperty.BeanPropertyType.BPT_REFERENCE;
                 property.value = dctJson[JSONTAG_PROPERTY_REFERENCE] as string;
-            }
-            else if (dctJson.ContainsKey(JSONTAG_PROPERTY_VALUE))
-            {
+            } else if (dctJson.ContainsKey(JSONTAG_PROPERTY_VALUE)) {
                 property.type = BeanData.BeanProperty.BeanPropertyType.BPT_SIMPLE;
                 property.value = dctJson[JSONTAG_PROPERTY_VALUE] as string;
-            }
-            else if (dctJson.ContainsKey(JSONTAG_PROPERTY_VALUE_BEAN))
-            {
+            } else if (dctJson.ContainsKey(JSONTAG_PROPERTY_VALUE_BEAN)) {
                 Dictionary<string, object> dctJsonBean = dctJson[JSONTAG_PROPERTY_VALUE_BEAN] as Dictionary<string, object>;
                 BeanData beanNew = null;
-                if (dctJsonBean.ContainsKey(JSONTAG_BEAN_IDMERGE))
-                {
+                if (dctJsonBean.ContainsKey(JSONTAG_BEAN_IDMERGE)) {
                     beanNew = context.getBean(dctJsonBean[JSONTAG_BEAN_IDMERGE] as string);
-                }
-                else
-                {
+                } else {
                     beanNew = new BeanData();
                     context.addBean(beanNew);
                 }
@@ -396,10 +327,8 @@ namespace Configurator
                 property.value = beanNew;
 
                 mergeContextBean(dctJsonBean, beanNew, context);
-            }
-            else if (dctJson.ContainsKey(JSONTAG_PROPERTY_VALUE_LIST) || dctJson.ContainsKey(JSONTAG_PROPERTY_VALUE_ARRAY)
-                || dctJson.ContainsKey(JSONTAG_PROPERTY_VALUE_SET) || dctJson.ContainsKey(JSONTAG_PROPERTY_VALUE_MAP))
-            {
+            } else if (dctJson.ContainsKey(JSONTAG_PROPERTY_VALUE_LIST) || dctJson.ContainsKey(JSONTAG_PROPERTY_VALUE_ARRAY)
+                  || dctJson.ContainsKey(JSONTAG_PROPERTY_VALUE_SET) || dctJson.ContainsKey(JSONTAG_PROPERTY_VALUE_MAP)) {
                 BeanData.BeanProperty.BeanValueCollection beanCol = new BeanData.BeanProperty.BeanValueCollection();
                 beanCol.type = dctJson.ContainsKey(JSONTAG_PROPERTY_VALUE_LIST) ? BeanData.BeanProperty.BeanValueCollection.BeanValueCollectionType.BVCT_LIST
                     : dctJson.ContainsKey(JSONTAG_PROPERTY_VALUE_ARRAY) ? BeanData.BeanProperty.BeanValueCollection.BeanValueCollectionType.BVCT_ARRAY
@@ -416,15 +345,13 @@ namespace Configurator
                 property.value = beanCol;
 
                 Dictionary<string, object> dctVals = null;
-                if (dctJson.ContainsKey(JSONTAG_PROPERTY_VALUE_LIST) || dctJson.ContainsKey(JSONTAG_PROPERTY_VALUE_ARRAY) || dctJson.ContainsKey(JSONTAG_PROPERTY_VALUE_SET))
-                {
+                if (dctJson.ContainsKey(JSONTAG_PROPERTY_VALUE_LIST) || dctJson.ContainsKey(JSONTAG_PROPERTY_VALUE_ARRAY) || dctJson.ContainsKey(JSONTAG_PROPERTY_VALUE_SET)) {
                     List<object> colVals = dctJson[dctJson.ContainsKey(JSONTAG_PROPERTY_VALUE_LIST) ? JSONTAG_PROPERTY_VALUE_LIST
                         : dctJson.ContainsKey(JSONTAG_PROPERTY_VALUE_ARRAY) ? JSONTAG_PROPERTY_VALUE_ARRAY : JSONTAG_PROPERTY_VALUE_SET] as List<object>;
                     dctVals = new Dictionary<string, object>();
                     for (int ii = 0; ii < colVals.Count; ++ii)
                         dctVals.Add("" + ii, colVals[ii]);
-                }
-                else
+                } else
                     dctVals = dctJson[JSONTAG_PROPERTY_VALUE_MAP] as Dictionary<string, object>;
                 mergeContextBeanPropertyCollectionValue(dctVals, beanCol, context);
             }
@@ -432,10 +359,8 @@ namespace Configurator
             return context;
         }
 
-        private IContext mergeContextBeanPropertyCollectionValue(Dictionary<string, object> dctJson, BeanData.BeanProperty.BeanValueCollection collection, IContext context)
-        {
-            foreach (string key in dctJson.Keys)
-            {
+        private IContext mergeContextBeanPropertyCollectionValue(Dictionary<string, object> dctJson, BeanData.BeanProperty.BeanValueCollection collection, IContext context) {
+            foreach (string key in dctJson.Keys) {
                 BeanData.BeanProperty property = new BeanData.BeanProperty();
                 property.name = key;
                 collection.collection.Add(property);

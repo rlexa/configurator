@@ -8,12 +8,17 @@
     <owners>devdroy</owners>
     <licenseUrl>https://github.com/rlexa/configurator/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/rlexa/configurator</projectUrl>
-    <iconUrl></iconUrl>
+    <!--<iconUrl></iconUrl>-->
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Data Configuration Framework</description>
     <releaseNotes>Nuget, portable class library.</releaseNotes>
     <copyright>Copyright 2015 (c) devdroy</copyright>
     <tags>C# Configuration XML JSON</tags>
+    <dependencies>
+      <group targetFramework="uap">
+        <dependency id="Newtonsoft.Json" version="10.0.2" />
+      </group>
+    </dependencies>
   </metadata>
   <files>
     <file src="bin\Release\Configurator.dll" target="lib\netstandard1.4\Configurator.dll" />

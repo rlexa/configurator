@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>devdroy.Configurator</id>
+    <version>1.0.0.4</version>
+    <title>Configurator</title>
+    <authors>Alex Rempel</authors>
+    <owners>devdroy</owners>
+    <licenseUrl>https://github.com/rlexa/configurator/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/rlexa/configurator</projectUrl>
+    <iconUrl></iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Data Configuration Framework</description>
+    <releaseNotes>Nuget, portable class library.</releaseNotes>
+    <copyright>Copyright 2015 (c) devdroy</copyright>
+    <tags>C# Configuration XML JSON</tags>
+  </metadata>
+  <files>
+    <file src="bin\Release\Configurator.dll" target="lib\netstandard1.4\Configurator.dll" />
+    <file src="bin\Release\Configurator.XML" target="lib\netstandard1.4\Configurator.XML" />
+  </files>
+</package>

@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Xml;
+using System.Linq;
+using System.Xml.Linq;
 
 namespace Configurator
 {
@@ -101,12 +102,14 @@ namespace Configurator
 
         private IContext mergeContext(string path, IContext context, CurrentConfiguration cfg) {
             Context.Log(this, "loading '" + path);
-            XmlDocument doc = new XmlDocument();
+            XDocument doc = null;
             try {
                 using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read)) {
-                    doc.Load(stream);
+                    using (var reader = new StreamReader(stream, System.Text.Encoding.UTF8)) {
+                        doc = XDocument.Parse(reader.ReadToEnd());
+                    }
                 }
-            } catch (System.IO.FileNotFoundException) {
+            } catch (FileNotFoundException) {
                 throw;
             } catch (Exception ex) {
                 throw new ConfiguratorException("Parsing XML threw an exception.", ex);
@@ -117,11 +120,11 @@ namespace Configurator
             cfg.colPaths.Add(path);
             cfg.strCurPath = path;
 
-            if (doc.DocumentElement.Name == XMLTAG_BEANS) {
-                mergeContext(cfg, doc.DocumentElement, context);
+            if (doc.Root.Name == XMLTAG_BEANS) {
+                mergeContext(cfg, doc.Root, context);
             }
 
-            foreach (XmlNode item in doc.DocumentElement.ChildNodes) {
+            foreach (var item in doc.Root.Elements()) {
                 if (item.Name == XMLTAG_BEANS) {
                     mergeContext(cfg, item, context);
                 }
@@ -130,17 +133,16 @@ namespace Configurator
             return context;
         }
 
-        private IContext mergeContext(CurrentConfiguration cfg, XmlNode xmlBeans, IContext context) {
-            foreach (XmlNode item in xmlBeans.ChildNodes) {
+        private IContext mergeContext(CurrentConfiguration cfg, XElement xmlBeans, IContext context) {
+            foreach (var item in xmlBeans.Elements()) {
                 if (item.Name == XMLTAG_IMPORT) {
                     string strPath = null;
                     bool bOptional = false;
-                    for (int jj = 0; jj < item.Attributes.Count; ++jj) {
-                        XmlAttribute attr = item.Attributes[jj];
+                    foreach (var attr in item.Attributes()) {
                         if (attr.Name == XMLATTR_IMPORT_PATH && !string.IsNullOrWhiteSpace(attr.Value)) {
                             strPath = attr.Value;
                         } else if (attr.Name == XMLATTR_IMPORT_OPTIONAL) {
-                            bOptional = Boolean.Parse(attr.Value);
+                            bOptional = bool.Parse(attr.Value);
                         }
                     }
                     if (string.IsNullOrWhiteSpace(strPath))
@@ -159,9 +161,9 @@ namespace Configurator
                     }
                 } else if (item.Name == XMLTAG_BEAN) {
                     BeanData bean = null;
-                    for (int jj = 0; jj < item.Attributes.Count; ++jj) {
-                        if (item.Attributes[jj].Name == XMLATTR_BEAN_IDMERGE) {
-                            bean = context.getBean(item.Attributes[jj].Value as string);
+                    foreach (var attr in item.Attributes()) {
+                        if (attr.Name == XMLATTR_BEAN_IDMERGE) {
+                            bean = context.getBean(attr.Value as string);
                             break;
                         }
                     }
@@ -176,9 +178,8 @@ namespace Configurator
             return context;
         }
 
-        private IContext mergeContextBean(XmlNode xmlBean, BeanData bean, IContext context) {
-            for (int jj = 0; jj < xmlBean.Attributes.Count; ++jj) {
-                XmlAttribute attr = xmlBean.Attributes[jj];
+        private IContext mergeContextBean(XElement xmlBean, BeanData bean, IContext context) {
+            foreach (var attr in xmlBean.Attributes()) {
                 if (attr.Name == XMLATTR_BEAN_ID && !string.IsNullOrWhiteSpace(attr.Value)) {
                     bean.id = attr.Value;
                     context.registerBeanWithId(bean);
@@ -200,8 +201,7 @@ namespace Configurator
                 }
             }
 
-            for (int kk = 0; kk < xmlBean.ChildNodes.Count; ++kk) {
-                XmlNode prop = xmlBean.ChildNodes[kk];
+            foreach (var prop in xmlBean.Elements()) {
                 if (prop.Name == XMLTAG_PROPERTY) {
                     BeanData.BeanProperty property = new BeanData.BeanProperty();
                     mergeContextBeanProperty(prop, property, context);
@@ -220,12 +220,11 @@ namespace Configurator
             return context;
         }
 
-        private IContext mergeContextBeanProperty(XmlNode xmlProperty, BeanData.BeanProperty property, IContext context) {
+        private IContext mergeContextBeanProperty(XElement xmlProperty, BeanData.BeanProperty property, IContext context) {
             string value = null;
             string valueRef = null;
 
-            for (int jj = 0; jj < xmlProperty.Attributes.Count; ++jj) {
-                XmlAttribute attr = xmlProperty.Attributes[jj];
+            foreach (var attr in xmlProperty.Attributes()) {
                 if (attr.Name == XMLATTR_PROPERTY_NAME && !string.IsNullOrWhiteSpace(attr.Value))
                     property.name = attr.Value;
                 else if (attr.Name == XMLATTR_PROPERTY_VALUE && !string.IsNullOrWhiteSpace(attr.Value))
@@ -240,16 +239,16 @@ namespace Configurator
             } else if (valueRef != null) {
                 property.type = BeanData.BeanProperty.BeanPropertyType.BPT_REFERENCE;
                 property.value = valueRef;
-            } else if (xmlProperty.ChildNodes.Count == 1) {
-                XmlNode xmlPropValue = xmlProperty.ChildNodes[0];
+            } else if (xmlProperty.Elements().Count() == 1) {
+                var xmlPropValue = xmlProperty.Elements().First();
                 if (xmlPropValue.Name == XMLTAG_NULL) {
                     property.type = BeanData.BeanProperty.BeanPropertyType.BPT_SIMPLE;
                     property.value = null;
                 } else if (xmlPropValue.Name == XMLTAG_BEAN) {
                     BeanData beanNew = null;
-                    for (int jj = 0; jj < xmlPropValue.Attributes.Count; ++jj) {
-                        if (xmlPropValue.Attributes[jj].Name == XMLATTR_BEAN_IDMERGE) {
-                            beanNew = context.getBean(xmlPropValue.Attributes[jj].Value as string);
+                    foreach (var attr in xmlPropValue.Attributes()) {
+                        if (attr.Name == XMLATTR_BEAN_IDMERGE) {
+                            beanNew = context.getBean(attr.Value as string);
                             break;
                         }
                     }
@@ -269,10 +268,9 @@ namespace Configurator
                         : xmlPropValue.Name == XMLTAG_SET ? BeanData.BeanProperty.BeanValueCollection.BeanValueCollectionType.BVCT_SET
                         : BeanData.BeanProperty.BeanValueCollection.BeanValueCollectionType.BVCT_MAP;
 
-                    for (int kk = 0; kk < xmlPropValue.Attributes.Count; ++kk) {
-                        XmlAttribute attr = xmlPropValue.Attributes[kk];
+                    foreach (var attr in xmlPropValue.Attributes()) {
                         if (attr.Name == XMLATTR_PROPERTY_COLLECTION_MERGE && !string.IsNullOrWhiteSpace(attr.Value))
-                            beanCol.col_merge = Boolean.Parse(attr.Value);
+                            beanCol.col_merge = bool.Parse(attr.Value);
                         else if (attr.Name == XMLATTR_PROPERTY_COLLECTION_CLASS_KEY && !string.IsNullOrWhiteSpace(attr.Value))
                             beanCol.col_class_key = attr.Value;
                         else if (attr.Name == XMLATTR_PROPERTY_COLLECTION_CLASS_VALUE && !string.IsNullOrWhiteSpace(attr.Value))
@@ -288,16 +286,15 @@ namespace Configurator
             return context;
         }
 
-        private IContext mergeContextBeanPropertyCollectionValue(XmlNode xmlPropertyCollectionValue, BeanData.BeanProperty.BeanValueCollection collection, IContext context) {
-            for (int ii = 0; ii < xmlPropertyCollectionValue.ChildNodes.Count; ++ii) {
-                XmlNode prop = xmlPropertyCollectionValue.ChildNodes[ii];
+        private IContext mergeContextBeanPropertyCollectionValue(XElement xmlPropertyCollectionValue, BeanData.BeanProperty.BeanValueCollection collection, IContext context) {
+            var ii = 0;
+            foreach (var prop in xmlPropertyCollectionValue.Elements()) {
                 if (prop.Name == XMLTAG_ITEM) {
                     string key = null;
                     if (collection.type != BeanData.BeanProperty.BeanValueCollection.BeanValueCollectionType.BVCT_MAP)
-                        key = "" + ii;
+                        key = "" + ii++;
 
-                    for (int jj = 0; jj < prop.Attributes.Count; ++jj) {
-                        XmlAttribute attr = prop.Attributes[jj];
+                    foreach (var attr in prop.Attributes()) {
                         if (attr.Name == XMLATTR_PROPERTY_KEY && !string.IsNullOrWhiteSpace(attr.Value) && collection.type == BeanData.BeanProperty.BeanValueCollection.BeanValueCollectionType.BVCT_MAP)
                             key = attr.Value;
                     }

@@ -165,7 +165,7 @@ namespace Configurator
                 }
             } catch (Exception ex) {
                 if (ex.GetType() == typeof(ConfiguratorException))
-                    throw ex;
+                    throw;
                 else
                     throw new ConfiguratorException("Exception while instantiating bean '" + infoTag + "'.", ex);
             }
@@ -343,7 +343,7 @@ namespace Configurator
                                 throw new ConfiguratorException("Bean '" + infoTag + "' collection property type '" + clazzConstructed.FullName + "' instantiating failed.");
                         } catch (Exception ex) {
                             if (ex.GetType() == typeof(ConfiguratorException))
-                                throw ex;
+                                throw;
                             else
                                 throw new ConfiguratorException("Bean '" + infoTag + "' exception while instantiating collection property type '" + clazzConstructed.FullName + "'.", ex);
                         }
@@ -374,7 +374,7 @@ namespace Configurator
                                 throw new ConfiguratorException("Bean '" + infoTag + "' collection property type '" + clazzConstructed.FullName + "' instantiating failed.");
                         } catch (Exception ex) {
                             if (ex.GetType() == typeof(ConfiguratorException))
-                                throw ex;
+                                throw;
                             else
                                 throw new ConfiguratorException("Bean '" + infoTag + "' exception while instantiating collection property type '" + clazzConstructed.FullName + "'.", ex);
                         }

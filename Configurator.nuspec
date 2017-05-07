@@ -15,13 +15,11 @@
     <copyright>Copyright 2015 (c) devdroy</copyright>
     <tags>C# Configuration XML JSON</tags>
     <dependencies>
-      <group targetFramework="uap">
-        <dependency id="Newtonsoft.Json" version="10.0.2" />
-      </group>
+      <dependency id="Newtonsoft.Json" version="8.0.3" />
     </dependencies>
   </metadata>
   <files>
-    <file src="bin\Release\Configurator.dll" target="lib\netstandard1.4\Configurator.dll" />
-    <file src="bin\Release\Configurator.XML" target="lib\netstandard1.4\Configurator.XML" />
+    <file src="bin\Release\Configurator.dll" target="lib\net45\Configurator.dll" />
+    <file src="bin\Release\Configurator.XML" target="lib\net45\Configurator.XML" />
   </files>
 </package>

@@ -2,7 +2,7 @@
 
 The Configurator project provides configuration based approach for C# applications using data configuration concepts very similar to Java Spring framework.
 
-##Introduction
+## Introduction
 The Configurator framework provides the possibility to use configuration based approach for software development. Configuration based approach benefits any project in multiple ways e.g.:
 
 - **Configurability**
@@ -20,13 +20,13 @@ The Configurator framework provides the possibility to use configuration based a
 	- input data for unit/integration testing is much easier to maintain when loaded from configuration files
 etc.
 
-##Concepts
+## Concepts
 The goal is to create a **framework for C# applications** which supports **flexible configuration** providing functionality starting with **configuring at runtime** constant values and all the way to loading all **code modules directly from configuration**. Following concepts are implemented in order to achieve this goal.
 
-###Data Based Configuration
+### Data Based Configuration
 The data structures has to support data-driven logic up unitl the last possible moment. This means that configuration data inheritance is to be perceived on data level and not on runtime type level.
 
-###Configuration Files
+###C onfiguration Files
 The **configuration data is saved in files** (currently JSON or XML) which are loaded at runtime. Used throughout the application this eliminates the dangers of hardcoded values and makes the setup values very transparent. Furthermore the configuration can be adjusted at latest possible time which makes it very **easy for deployment engineers to setup values** without interfering with developers. Additionally, as opposed to setting the values in a database, the editing of base (pre-deployment change) configuration files and checking those into the **versioning system provides change history**. The loading context is structured in a way that allows for **loading of multiple files** providing additional modularization and transparency of the configuration data itself.
 The loading of configuration files is done via following code:
 
@@ -59,7 +59,7 @@ With that the configuration context is loaded including all other importes files
 
 The configuration modules defined in the files are called “beans” in the configuration which is not exactly the same as Java beans – it just shows that Java Spring framework was used as reference for implementation.
 
-###Inflating Modules
+### Inflating Modules
 Loading of actual runtime type instances is done via inflating configuration modules referenced by an ID. The loading of configuration context does not create any instances. **Runtime type instances are created explicitly at inflating time**:
 
 ...C#...
@@ -84,7 +84,7 @@ Loading of actual runtime type instances is done via inflating configuration mod
 
 The FooClass instance and all possibly therein referenced configuration modules in the example is created at inflate time, not at loadContext time. The “scope” attribute is “singleton” by default and can be set to “prototype” – a “singleton” scope module will be created just once and any inflate try thereafter will return the already created instance, whereas “prototype” scope leads to creating a new instance everytime.
 
-###Configuration via C# Reflection
+### Configuration via C# Reflection
 The configuration data in the files **targets actual C# setter functions, properties and public members**. Furthermore **simple type variables can be configured** and referenced throughout the configuration context.
 
 ...C#...
@@ -183,7 +183,7 @@ In case a default **constructor is missing a constructor with arguments can also
 
 	{ "id": "foo1", ..., "factory": {"params": [ "constructor_param_value" ]} }
 
-###Collections
+### Collections
 Following collection types are supported in configuration context: “map” (Dictionary), “list” (List), “set” (HashSet) and “array” (native array). For maps the key type has to be provided in configuration and for every collection the value type has to be provided. The collections also support merging on inheritance (see later).
 
 ...C#...
@@ -252,7 +252,7 @@ Following collection types are supported in configuration context: “map” (Di
         }
     }
 
-###Data Referencing
+### Data Referencing
 
 Apart from anonymous nested modules used as values all other modules should have the “id” attribute set. This attribute is used throughout configuration and code to inflate and reference the module.
 
@@ -327,7 +327,7 @@ Module referencing also opens up more possibilities for setting configuration va
 
 As shown in the example, the framework supports nested referencing and creation of modules (which is the only place anonymous modules would be useful). In this case when ID “MathModuleHolder” is inflated it will have 4 entries in its dictionary “MathModules” where all 4 of them were set using different techniques; a reference to an already defined module, a creation of an anonymous module, an inheritance module and a NULL value.
 
-###Data Inheritance
+### Data Inheritance
 The framework provides inheritance concepts on data level supporting configuration of multiple similar data modules with minimal work:
 
 ...XML...
@@ -379,7 +379,7 @@ The framework provides inheritance concepts on data level supporting configurati
 
 Any non-anonymous module can be a parent to another module in which case the properties of both will be merged in a way that the child overwrites the parent’s properties if set. For collections the flag “merge” has to be defined as “true” if merging of values should happen. A parent module can be flagged as “abstract” which would prevent inflation of that module at runtime.
 
-###Nested Import
+### Nested Import
 From within a configuration file other configuration files may be referenced and imported.
 
 ...XML...
@@ -399,7 +399,7 @@ From within a configuration file other configuration files may be referenced and
 
 The importing happens when the import module is encountered allowing for controlled overwriting of modules. Usually the import modules are set on the top for better dependency transparency, but as instancing happens at inflating time only they don’t have to be.
 
-##Example: Optional Tool Configuration
+## Example: Optional Tool Configuration
 
 Sometimes there is a need for a tool which lets users/clients look up and maybe even change some data in e.g. some database. Apart from the configuration for the tool itself it would be a good idea to provide a possibility for the user to have an own configuration file which is tool-optional i.e. even after updates of the tool itself this file would stay the same and basically provide some user specific configuration.
 Here is a small example for a configuration root file for such a tool:

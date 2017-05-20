@@ -200,11 +200,11 @@ Following collection types are supported in configuration context: “map” (Di
 
 ...XML...
 
-	<bean ...>
+    <bean ...>
         <property name="dct">
-			<map class-key="int" class-value="string">
-		        <item key="10" value="ten"/>
-		        <item key="11" value="eleven"/>
+            <map class-key="int" class-value="string">
+                <item key="10" value="ten"/>
+                <item key="11" value="eleven"/>
             </map>
         </property>
         <property name="lst">
@@ -229,26 +229,26 @@ Following collection types are supported in configuration context: “map” (Di
 
 ...JSON...
 
-	{
-		...
-	    "properties": {
-	        "dct": {
-		        "value-class-key": "int",
-		        "value-class-value": "string",
-		        "value-map": { "10": "ten", "11": "eleven" }
-	        },
-	        "lst": {
-		        "value-class-value": "double",
-		        "value-list": [ 11.1, 22.2 ]
-	        },
-	        "array": {
-		        "value-class-value": "long",
-		        "value-array": [ 123, 234 ]
-	        },
-	        "set": {
-		        "value-class-value": "short",
-		        "value-list": [ 1, 2 ]
-	        }
+    {
+        ...
+        "properties": {
+            "dct": {
+                "value-class-key": "int",
+                "value-class-value": "string",
+                "value-map": { "10": "ten", "11": "eleven" }
+            },
+            "lst": {
+                "value-class-value": "double",
+                "value-list": [ 11.1, 22.2 ]
+            },
+            "array": {
+                "value-class-value": "long",
+                "value-array": [ 123, 234 ]
+            },
+            "set": {
+                "value-class-value": "short",
+                "value-list": [ 1, 2 ]
+            }
         }
     }
 

@@ -269,61 +269,61 @@ Module referencing also opens up more possibilities for setting configuration va
 
 ...XML...
 
-	<bean id="Math" class="Some.Namespace.Math, SomeAssembly">
-		<property name="pi" value="3.14"/>
-	</bean>
-	<bean id="MathModuleHolder" ...>
-	    <property name="MathModules">
-	        <map class-key="string" class-value="Some.Namespace.Math, SomeAssembly">
-	            <item key="VanillaWorld" value-ref="Math"/>
-	            <item key="CrazyWorld">
-		            <bean class="Some.Namespace.Math, SomeAssembly">
-			            <property name="pi" value="4.13"/>
-					</bean>
-				</item>
-	            <item key="SlightlyCrazyWorld">
-		            <bean parent="Math">
-			            <property name="pi" value="1.34"/>
-			        </bean>
-			    </item>
-	            <item key="NullWorld"></null></item>
+    <bean id="Math" class="Some.Namespace.Math, SomeAssembly">
+        <property name="pi" value="3.14"/>
+    </bean>
+    <bean id="MathModuleHolder" ...>
+        <property name="MathModules">
+            <map class-key="string" class-value="Some.Namespace.Math, SomeAssembly">
+                <item key="VanillaWorld" value-ref="Math"/>
+                <item key="CrazyWorld">
+                    <bean class="Some.Namespace.Math, SomeAssembly">
+                        <property name="pi" value="4.13"/>
+                    </bean>
+                </item>
+                <item key="SlightlyCrazyWorld">
+                    <bean parent="Math">
+                        <property name="pi" value="1.34"/>
+                    </bean>
+                </item>
+                <item key="NullWorld"></null></item>
             </map>
-	    </property>
-	</bean>
+        </property>
+    </bean>
 
 ...JSON...
 
-	{
-		"id": "Math",
-		"class": "Some.Namespace.Math, SomeAssembly",
-		"properties": { "pi": 3.14, "euler": 2.72 }
-	}
-	{
-	    "id": "MathModuleHolder",
-	    ...
-	    "properties": {
-	        "MathModules": {
-	            "value-class-key": "string",
-	            "value-class-value": "Some.Namespace.Math, SomeAssembly",
-	            "value-map": {
-	                "VanillaWorld": { "value-ref": "Math" },
-	                "CrazyWorld": {
-		                "value-bean": {
-			                "class": "Some.Namespace.Math, SomeAssembly",
-			                "properties": {"pi": 4.13, "euler": 7.27}
-		                }
-	                },
-	                "SlightlyCrazyWorld": {
-		                "value-bean": {
-			                "parent": "Math",
-			                "properties": {"pi": 1.34}
-		                }
-	                },
-	                "NullWorld": null
-	            }
-	        }
-	    }
-	}
+    {
+        "id": "Math",
+        "class": "Some.Namespace.Math, SomeAssembly",
+        "properties": { "pi": 3.14, "euler": 2.72 }
+    },
+    {
+        "id": "MathModuleHolder",
+        ...
+        "properties": {
+            "MathModules": {
+                "value-class-key": "string",
+                "value-class-value": "Some.Namespace.Math, SomeAssembly",
+                "value-map": {
+                    "VanillaWorld": { "value-ref": "Math" },
+                    "CrazyWorld": {
+                        "value-bean": {
+                            "class": "Some.Namespace.Math, SomeAssembly",
+                            "properties": {"pi": 4.13, "euler": 7.27}
+                        }
+                    },
+                    "SlightlyCrazyWorld": {
+                        "value-bean": {
+                            "parent": "Math",
+                            "properties": {"pi": 1.34}
+                        }
+                    },
+                    "NullWorld": null
+                }
+            }
+        }
+    }
 
 As shown in the example, the framework supports nested referencing and creation of modules (which is the only place anonymous modules would be useful). In this case when ID “MathModuleHolder” is inflated it will have 4 entries in its dictionary “MathModules” where all 4 of them were set using different techniques; a reference to an already defined module, a creation of an anonymous module, an inheritance module and a NULL value.
 

@@ -201,31 +201,31 @@ Following collection types are supported in configuration context: “map” (Di
 ...XML...
 
 	<bean ...>
-	    <property name="dct">
+        <property name="dct">
 			<map class-key="int" class-value="string">
 		        <item key="10" value="ten"/>
 		        <item key="11" value="eleven"/>
-			</map>
-		</property>
-		<property name="lst">
-			<list class-value="double">
-		        <item value="11.1"/>
-		        <item value="22.2"/>
-			</list>
-		</property>
-		<property name="arr">
-			<array class-value="long">
-		        <item value="123"/>
-		        <item value="234"/>
-		    </array>
-	    </property>
-	    <property name="set">
-	        <set class-value="short">
-		        <item value="1"/>
-		        <item value="2"/>
-	        </set>
-	    </property>
-	</bean>
+            </map>
+        </property>
+        <property name="lst">
+            <list class-value="double">
+                <item value="11.1"/>
+                <item value="22.2"/>
+            </list>
+        </property>
+        <property name="arr">
+            <array class-value="long">
+                <item value="123"/>
+                <item value="234"/>
+            </array>
+        </property>
+        <property name="set">
+            <set class-value="short">
+                <item value="1"/>
+                <item value="2"/>
+            </set>
+        </property>
+    </bean>
 
 ...JSON...
 

@@ -389,13 +389,13 @@ From within a configuration file other configuration files may be referenced and
 
 ...JSON...
 
-	{
-	    /* import: can be a string or an array of strings and/or objects */
-	    "import": [
-		    "./additional_file.json",
-		    { "path": "./may_not_even_exist.json", "optional": true }
-	    ]
-	}
+    {
+        /* import: can be a string or an array of strings and/or objects */
+        "import": [
+            "./additional_file.json",
+            { "path": "./may_not_even_exist.json", "optional": true }
+        ]
+    }
 
 The importing happens when the import module is encountered allowing for controlled overwriting of modules. Usually the import modules are set on the top for better dependency transparency, but as instancing happens at inflating time only they don’t have to be.
 
@@ -404,42 +404,42 @@ The importing happens when the import module is encountered allowing for control
 Sometimes there is a need for a tool which lets users/clients look up and maybe even change some data in e.g. some database. Apart from the configuration for the tool itself it would be a good idea to provide a possibility for the user to have an own configuration file which is tool-optional i.e. even after updates of the tool itself this file would stay the same and basically provide some user specific configuration.
 Here is a small example for a configuration root file for such a tool:
 
-	<?xml version="1.0" encoding="utf-8" ?>
-	<beans>
-	    ... configuration beans for overall setup including e.g. ...
-	    ... references to the "LoginData" bean below ...
-	    <bean id="LoginData" class...>
-	        <property name="dbname" value="project_data" />
-	        <property name="user" value="guest" />
-	        <property name="password" value="guest" />
-	    </bean>
-	</beans>
+    <?xml version="1.0" encoding="utf-8" ?>
+    <beans>
+        ... configuration beans for overall setup including e.g. ...
+        ... references to the "LoginData" bean below ...
+        <bean id="LoginData" class...>
+            <property name="dbname" value="project_data" />
+            <property name="user" value="guest" />
+            <property name="password" value="guest" />
+        </bean>
+    </beans>
 
 OK then, let’s say the “LoginData” module is used in the actual application – either inflated directly or (always the better approach) referenced directly in the configuration. The tool now can be used to view some data from whatever content “project_data” database is holding. But what if one of the tool users is an administrator and he would like to also use the tool for editing? Even after the editing capabilities would be added, the “guest” login is surely set to have readonly access. The administrator now could go ahead and simply adjust the values in the configuration to have his own authorization data – this is already a good approach as it allows for change of login data without having to re-compile-build-deploy the whole tool. But what if the administrator forgets about his login data being in the configuration and sends the tool incl. configuration to somebody else? And what if there is an update of the tool coming up and the administrator would overwrite the current configuration with the updated one – he would have to remember to update his login data again.
 A better way would be to provide a possibility for the user to have his own file overwriting the login data which he wouldn’t need to update and ideally wouldn’t have to overwrite on any tool related updates (apart from rarely needed property rename and such). So let’s import an optional file there:
 
-	<?xml version="1.0" encoding="utf-8" ?>
-	<beans>
-	    ... configuration beans for overall setup including e.g. ...
-	    ... references to the "LoginData" bean below ...
-		<bean id="LoginData" class...>
-	        <property name="dbname" value="project_data" />
-	        <property name="user" value="guest" />
-	        <property name="password" value="guest" />
-	    </bean>
+    <?xml version="1.0" encoding="utf-8" ?>
+    <beans>
+        ... configuration beans for overall setup including e.g. ...
+        ... references to the "LoginData" bean below ...
+        <bean id="LoginData" class...>
+            <property name="dbname" value="project_data" />
+            <property name="user" value="guest" />
+            <property name="password" value="guest" />
+        </bean>
 
-	    <import path="../usercfg.xml" optional="true" />
+        <import path="../usercfg.xml" optional="true" />
 
-	</beans>
+    </beans>
 
 This way the configuration context will search for a “usercfg.xml” file in parent directory of the executed tool and parse it if it’s there. The template file provided to the user would look like this:
 
-	<?xml version="1.0" encoding="utf-8" ?>
-	<beans>
-		<bean id-merge="LoginData">
-		    <property name="user" value="guest" />
-		    <property name="password" value="guest" />
-	    </bean>
-	</beans>
+    <?xml version="1.0" encoding="utf-8" ?>
+    <beans>
+        <bean id-merge="LoginData">
+            <property name="user" value="guest" />
+            <property name="password" value="guest" />
+        </bean>
+    </beans>
 
 The user could now create the file if needed using this template and add his login data.

@@ -332,50 +332,50 @@ The framework provides inheritance concepts on data level supporting configurati
 
 ...XML...
 
-	<bean id="ACar" abstract="true">
-	    <property name="type" value="Combi"/>
-	    <property name="model"></null></property>
-	    <property name="features">
-		    <list class-value="string">
-		        <item value="Steering Wheel"/>
-		        <item value="Motor"/>
-		    </list>
-	    </property>
-	</bean>
-	<bean id="CarModel1" parent="ACar">
-	    <property name="model" value="HC123" />
-	    <property name="features">
-		    <list merge="true">
-		        <item value="Seat Heating"/>
-		    </list>
-	    </property>
-	</bean>
+    <bean id="ACar" abstract="true">
+        <property name="type" value="Combi"/>
+        <property name="model"></null></property>
+        <property name="features">
+            <list class-value="string">
+                <item value="Steering Wheel"/>
+                <item value="Motor"/>
+            </list>
+        </property>
+    </bean>
+    <bean id="CarModel1" parent="ACar">
+        <property name="model" value="HC123" />
+        <property name="features">
+            <list merge="true">
+                <item value="Seat Heating"/>
+            </list>
+        </property>
+    </bean>
 
 ...JSON...
 
-	{
-		"id": "ACar",
-		"abstract": true,
-		"properties": {
-			"type": "Combi",
-			"model": null,
-			"features": {
-				"value-class-value": "string",
-				"value-list": ["Steering Wheel", "Motor"]
-			}
-		}
-	},
-	{
-		"id": "CarModel1",
-		"parent": "ACar",
-		"properties": {
-			"model": "HC123",
-			"features": {
-				"merge":true,
-				"value-list": ["Seat Heating"]
-			}
-		}
-	}
+    {
+        "id": "ACar",
+        "abstract": true,
+        "properties": {
+            "type": "Combi",
+            "model": null,
+            "features": {
+                "value-class-value": "string",
+                "value-list": ["Steering Wheel", "Motor"]
+            }
+        }
+    },
+    {
+        "id": "CarModel1",
+        "parent": "ACar",
+        "properties": {
+            "model": "HC123",
+            "features": {
+                "merge":true,
+                "value-list": ["Seat Heating"]
+            }
+        }
+    }
 
 Any non-anonymous module can be a parent to another module in which case the properties of both will be merged in a way that the child overwrites the parent’s properties if set. For collections the flag “merge” has to be defined as “true” if merging of values should happen. A parent module can be flagged as “abstract” which would prevent inflation of that module at runtime.
 

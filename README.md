@@ -26,7 +26,7 @@ The goal is to create a **framework for C# applications** which supports **flexi
 ### Data Based Configuration
 The data structures has to support data-driven logic up unitl the last possible moment. This means that configuration data inheritance is to be perceived on data level and not on runtime type level.
 
-###C onfiguration Files
+### Configuration Files
 The **configuration data is saved in files** (currently JSON or XML) which are loaded at runtime. Used throughout the application this eliminates the dangers of hardcoded values and makes the setup values very transparent. Furthermore the configuration can be adjusted at latest possible time which makes it very **easy for deployment engineers to setup values** without interfering with developers. Additionally, as opposed to setting the values in a database, the editing of base (pre-deployment change) configuration files and checking those into the **versioning system provides change history**. The loading context is structured in a way that allows for **loading of multiple files** providing additional modularization and transparency of the configuration data itself.
 The loading of configuration files is done via following code:
 

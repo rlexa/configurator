@@ -1,4 +1,4 @@
-#Configurator Project (C#)
+# Configurator Project (C#)
 
 The Configurator project provides configuration based approach for C# applications using data configuration concepts very similar to Java Spring framework.
 

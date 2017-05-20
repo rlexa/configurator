@@ -162,12 +162,12 @@ Additionally it is **possible to target static factory functions** for configuri
 
 	{
 		"id": "singleton1",
-		class="FooTest.FooClass1, Foo",
+		"class": "FooTest.FooClass1, Foo",
 		"factory": { "static": "GetInstance" }
 	},
 	{
 		"id": "singleton2",
-		class="FooTest.FooClass2, Foo",
+		"class": "FooTest.FooClass2, Foo",
 		"factory": { "static": "GetInstance", "params": [ "somevalue" ] }
 	}
 

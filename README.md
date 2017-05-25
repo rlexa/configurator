@@ -24,7 +24,7 @@ etc.
 The goal is to create a **framework for C# applications** which supports **flexible configuration** providing functionality starting with constant values **configured  after compile time** and all the way to loading all **class objects referencing each other directly from configuration**. Following concepts are implemented in order to achieve this goal.
 
 ### Data Based Configuration
-The data structures has to support data-driven logic up until the last possible moment. This means that configuration data inheritance is to be perceived on data level and not on runtime type level. There can be configuration objects containing data properties with values and references to other objects - inheriting, merging and overwriting those properties from each other - without any actual class being set on those objects up until the leaf objects in the tree.
+The data structure has to support data-driven logic up until the last possible moment. This means that configuration data inheritance is to be perceived on data level and not on runtime type level. There can be configuration objects containing data properties with values and references to other objects - inheriting, merging and overwriting those properties from each other - without any actual class being set on those objects up until the leaf objects in the tree.
 
 ### Configuration Files
 The **configuration data is saved in files** (currently JSON or XML) which are loaded at runtime. Used throughout the application this eliminates the dangers of hardcoded values and makes the setup values very transparent. Furthermore the configuration can be adjusted at latest possible time which makes it very **easy for deployment engineers to setup values** without interfering with developers. Additionally, as opposed to setting the values in a database, the editing of base (pre-deployment change) configuration files and checking those into the **versioning system provides change history**. The loading context is structured in a way that allows for **loading of multiple files** providing additional modularization and transparency of the configuration data itself.
@@ -95,7 +95,7 @@ The configuration data in the files **targets actual C# setter functions, proper
 	    private int m_iValue;
 	    private float m_fValue;
 	    public void setPrivateValue(int value) { m_iValue = value; }
-	    public float FloatProperty { get { return m_fValue; } set { m_fValue= value; } }
+	    public float FloatProperty { get { return m_fValue; } set { m_fValue = value; } }
 	}
 
 While inflating an instance of the FooClass type following configuration keys can be used to setup the module: “name”, “PrivateValue” and “FloatProperty”:
@@ -135,53 +135,53 @@ Additionally it is **possible to target static factory functions** for configuri
 
 ...C#...
 
-	namespace FooTest
+    namespace FooTest
 	{
-	    public class FooClass1
-	    {
-	        public static FooClass1 GetInstance() { ... }
-	    }
-	    public class FooClass2
-	    {
-	        public static FooClass2 GetInstance(string param1) { ... }
-	    }
-	}
+        public class FooClass1
+        {
+            public static FooClass1 GetInstance() { ... }
+        }
+        public class FooClass2
+        {
+            public static FooClass2 GetInstance(string param1) { ... }
+        }
+    }
 
 ...XML...
 
-	<bean id="singleton1" class="FooTest.FooClass1, Foo">
-		<factory name="GetInstance" />
-	</bean>
-	<bean id="singleton2" class="FooTest.FooClass2, Foo">
-		<factory name="GetInstance">
-			<item value="somevalue" />
-		</factory>
-	</bean>
+    <bean id="singleton1" class="FooTest.FooClass1, Foo">
+        <factory name="GetInstance" />
+    </bean>
+    <bean id="singleton2" class="FooTest.FooClass2, Foo">
+        <factory name="GetInstance">
+            <item value="somevalue" />
+        </factory>
+    </bean>
 
 ...JSON...
 
-	{
-		"id": "singleton1",
-		"class": "FooTest.FooClass1, Foo",
-		"factory": { "static": "GetInstance" }
-	},
-	{
-		"id": "singleton2",
-		"class": "FooTest.FooClass2, Foo",
-		"factory": { "static": "GetInstance", "params": [ "somevalue" ] }
-	}
+    {
+        "id": "singleton1",
+        "class": "FooTest.FooClass1, Foo",
+        "factory": { "static": "GetInstance" }
+    },
+    {
+        "id": "singleton2",
+        "class": "FooTest.FooClass2, Foo",
+        "factory": { "static": "GetInstance", "params": [ "somevalue" ] }
+    }
 
-In case a default **constructor is missing a constructor with arguments can also be targeted** from configuration:
+In case a default constructor is missing a constructor with arguments can also be targeted from configuration:
 
 ...XML...
 
-	<bean id="foo1" ...>
-		<factory><item value="constructor_param_value"/></factory>
-	</bean>
+    <bean id="foo1" ...>
+        <factory><item value="constructor_param_value"/></factory>
+    </bean>
 
 ...JSON...
 
-	{ "id": "foo1", ..., "factory": {"params": [ "constructor_param_value" ]} }
+    { "id": "foo1", ..., "factory": {"params": [ "constructor_param_value" ]} }
 
 ### Collections
 Following collection types are supported in configuration context: “map” (Dictionary), “list” (List), “set” (HashSet) and “array” (native array). For maps the key type has to be provided in configuration and for every collection the value type has to be provided. The collections also support merging on inheritance (see later).

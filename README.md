@@ -57,7 +57,7 @@ With that the configuration context is loaded including all other imported files
         ]
     }
 
-The configuration modules defined in the files are called “beans” in the configuration which is not exactly the same as Java beans – it just shows that Java Spring framework was used as reference for implementation.
+The configuration modules defined in the files are called "beans" in the configuration which is not exactly the same as Java beans – it just shows that Java Spring framework was used as reference for implementation.
 
 ### Inflating Modules
 Loading of actual runtime type instances is done via inflating configuration modules referenced by an ID. The loading of configuration context does not create any instances. **Runtime type instances are created explicitly at inflating time**:
@@ -82,7 +82,7 @@ Loading of actual runtime type instances is done via inflating configuration mod
 	IContext context = ContextLoader.loadContext(strPath);
 	FooClass oInstance = context.inflate("foo1") as FooClass;
 
-The FooClass instance and all possibly therein referenced configuration modules in the example is created at inflate time, not at loadContext time. The “scope” attribute is “singleton” by default and can be set to “prototype” – a “singleton” scope module will be created just once and any inflate try thereafter will return the already created instance, whereas “prototype” scope leads to creating a new instance everytime.
+The FooClass instance and all possibly therein referenced configuration modules in the example is created at inflate time, not at loadContext time. The "scope" attribute is "singleton" by default and can be set to "prototype" – a "singleton" scope module will be created just once and any inflate try thereafter will return the already created instance, whereas "prototype" scope leads to creating a new instance everytime.
 
 ### Configuration via C# Reflection
 The configuration data in the files **targets actual C# setter functions, properties and public members**. Furthermore **simple type variables can be configured** and referenced throughout the configuration context.
@@ -98,7 +98,7 @@ The configuration data in the files **targets actual C# setter functions, proper
 	    public float FloatProperty { get { return m_fValue; } set { m_fValue = value; } }
 	}
 
-While inflating an instance of the FooClass type following configuration keys can be used to setup the module: “name”, “PrivateValue” and “FloatProperty”:
+While inflating an instance of the FooClass type following configuration keys can be used to setup the module: "name", "PrivateValue" and "FloatProperty":
 
 ...XML...
 
@@ -120,7 +120,7 @@ While inflating an instance of the FooClass type following configuration keys ca
 	    }
 	}
 
-For any given key the inflation **context tries to search for a public member of that name, a property providing a setter or a public function prepending the key with “set” or “Set”**.
+For any given key the inflation **context tries to search for a public member of that name, a property providing a setter or a public function prepending the key with "set" or "Set"**.
 **Simple type values like int, float, string etc. can also be configured** in which case the configured value is assigned at inflate time:
 
 ...XML...
@@ -184,7 +184,7 @@ In case a default constructor is missing a constructor with arguments can also b
     { "id": "foo1", ..., "factory": {"params": [ "constructor_param_value" ]} }
 
 ### Collections
-Following collection types are supported in configuration context: “map” (Dictionary), “list” (List), “set” (HashSet) and “array” (native array). For maps the key type has to be provided in configuration and for every collection the value type has to be provided. The collections also support merging on inheritance (see later).
+Following collection types are supported in configuration context: "map" (Dictionary), "list" (List), "set" (HashSet) and "array" (native array). For maps the key type has to be provided in configuration and for every collection the value type has to be provided. The collections also support merging on inheritance (see later).
 
 ...C#...
 
@@ -254,7 +254,7 @@ Following collection types are supported in configuration context: “map” (Di
 
 ### Data Referencing
 
-Apart from anonymous nested modules used as values all other modules should have the “id” attribute set. This attribute is used throughout configuration and code to inflate and reference the module.
+Apart from anonymous nested modules used as values all other modules should have the "id" attribute set. This attribute is used throughout configuration and code to inflate and reference the module.
 
 ...XML...
 
@@ -262,9 +262,9 @@ Apart from anonymous nested modules used as values all other modules should have
 
 ...JSON...
 
-	{ "id"="Math", ... "properties": {"pi":3.14} }
+	{ "id"="Math", ... "properties": {"pi": 3.14} }
 
-The module in the example can now be referenced by the ID “Math”. On parsing another module with the same ID as an existing one an exception will be thrown, except when excplicitly importing another module with the same ID for overwriting in which case “id-merge” attribute has to be used.
+The module in the example can now be referenced by the ID "Math". On parsing another module with the same ID as an existing one an exception will be thrown, except when excplicitly importing another module with the same ID for overwriting in which case "id-merge" attribute has to be used.
 Module referencing also opens up more possibilities for setting configuration values:
 
 ...XML...
@@ -325,7 +325,7 @@ Module referencing also opens up more possibilities for setting configuration va
         }
     }
 
-As shown in the example, the framework supports nested referencing and creation of modules (which is the only place anonymous modules would be useful). In this case when ID “MathModuleHolder” is inflated it will have 4 entries in its dictionary “MathModules” where all 4 of them were set using different techniques; a reference to an already defined module, a creation of an anonymous module, an inheritance module and a NULL value.
+As shown in the example, the framework supports nested referencing and creation of modules (which is the only place anonymous modules would be useful). In this case when ID "MathModuleHolder" is inflated it will have 4 entries in its dictionary "MathModules" where all 4 of them were set using different techniques; a reference to an already defined module, a creation of an anonymous module, an inheritance module and a NULL value.
 
 ### Data Inheritance
 The framework provides inheritance concepts on data level supporting configuration of multiple similar data modules with minimal work:
@@ -377,7 +377,7 @@ The framework provides inheritance concepts on data level supporting configurati
         }
     }
 
-Any non-anonymous module can be a parent to another module in which case the properties of both will be merged in a way that the child overwrites the parent’s properties if set. For collections the flag “merge” has to be defined as “true” if merging of values should happen. A parent module can be flagged as “abstract” which would prevent inflation of that module at runtime.
+Any non-anonymous module can be a parent to another module in which case the properties of both will be merged in a way that the child overwrites the parent's properties if set. For collections the flag "merge" has to be defined as "true" if merging of values should happen. A parent module can be flagged as "abstract" which would prevent inflation of that module at runtime. Note the lack of class definition on the parent module - only the modules which are inflated at runtime need a class.
 
 ### Nested Import
 From within a configuration file other configuration files may be referenced and imported.
@@ -397,7 +397,7 @@ From within a configuration file other configuration files may be referenced and
         ]
     }
 
-The importing happens when the import module is encountered allowing for controlled overwriting of modules. Usually the import modules are set on the top for better dependency transparency, but as instancing happens at inflating time only they don’t have to be.
+The importing happens when the import module is encountered allowing for controlled overwriting of modules. Usually the import modules are set on the top for better dependency transparency, but as instancing happens at inflating time only they don't have to be.
 
 ## Example: Optional Tool Configuration
 
@@ -415,8 +415,8 @@ Here is a small example for a configuration root file for such a tool:
         </bean>
     </beans>
 
-OK then, let’s say the “LoginData” module is used in the actual application – either inflated directly or (always the better approach) referenced directly in the configuration. The tool now can be used to view some data from whatever content “project_data” database is holding. But what if one of the tool users is an administrator and he would like to also use the tool for editing? Even after the editing capabilities would be added, the “guest” login is surely set to have readonly access. The administrator now could go ahead and simply adjust the values in the configuration to have his own authorization data – this is already a good approach as it allows for change of login data without having to re-compile-build-deploy the whole tool. But what if the administrator forgets about his login data being in the configuration and sends the tool incl. configuration to somebody else? And what if there is an update of the tool coming up and the administrator would overwrite the current configuration with the updated one – he would have to remember to update his login data again.
-A better way would be to provide a possibility for the user to have his own file overwriting the login data which he wouldn’t need to update and ideally wouldn’t have to overwrite on any tool related updates (apart from rarely needed property rename and such). So let’s import an optional file there:
+OK then, let's say the "LoginData" module is used in the actual application – either inflated directly or (always the better approach) inidrectly by being referenced in the configuration by the whatever data access module used for actual DB ops. The tool now can be used to view some data from whatever content "project_data" database is holding. But what if one of the tool users is an administrator and he would like to also use the tool for editing? Even after the editing capabilities would be added, the "guest" login is surely set to have readonly access. The administrator now could go ahead and simply adjust the values in the configuration to have his own authorization data – this is already a good approach as it allows for change of login data without having to re-compile-build-deploy the whole tool. But what if the administrator forgets about his login data being in the configuration and sends the tool incl. configuration to somebody else? And what if there is an update of the tool coming up and the administrator would overwrite the current configuration with the updated one – he would have to remember to update his login data again.
+A better way would be to provide a possibility for the user to have his own file overwriting the login data which he wouldn't need to update and ideally wouldn't have to overwrite on any tool related updates (apart from rarely needed property rename and such). So let's import an optional file there:
 
     <?xml version="1.0" encoding="utf-8" ?>
     <beans>
@@ -432,7 +432,7 @@ A better way would be to provide a possibility for the user to have his own file
 
     </beans>
 
-This way the configuration context will search for a “usercfg.xml” file in parent directory of the executed tool and parse it if it’s there. The template file provided to the user would look like this:
+This way the configuration context will search for a "usercfg.xml" file in parent directory of the executed tool and parse it if it's there. The template file provided to the user would look like this:
 
     <?xml version="1.0" encoding="utf-8" ?>
     <beans>

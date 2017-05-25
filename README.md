@@ -21,10 +21,10 @@ The Configurator framework provides the possibility to use configuration based a
 etc.
 
 ## Concepts
-The goal is to create a **framework for C# applications** which supports **flexible configuration** providing functionality starting with **configuring at runtime** constant values and all the way to loading all **code modules directly from configuration**. Following concepts are implemented in order to achieve this goal.
+The goal is to create a **framework for C# applications** which supports **flexible configuration** providing functionality starting with constant values **configured  after compile time** and all the way to loading all **class objects referencing each other directly from configuration**. Following concepts are implemented in order to achieve this goal.
 
 ### Data Based Configuration
-The data structures has to support data-driven logic up unitl the last possible moment. This means that configuration data inheritance is to be perceived on data level and not on runtime type level.
+The data structures has to support data-driven logic up until the last possible moment. This means that configuration data inheritance is to be perceived on data level and not on runtime type level. There can be configuration objects containing data properties with values and references to other objects - inheriting, merging and overwriting those properties from each other - without any actual class being set on those objects up until the leaf objects in the tree.
 
 ### Configuration Files
 The **configuration data is saved in files** (currently JSON or XML) which are loaded at runtime. Used throughout the application this eliminates the dangers of hardcoded values and makes the setup values very transparent. Furthermore the configuration can be adjusted at latest possible time which makes it very **easy for deployment engineers to setup values** without interfering with developers. Additionally, as opposed to setting the values in a database, the editing of base (pre-deployment change) configuration files and checking those into the **versioning system provides change history**. The loading context is structured in a way that allows for **loading of multiple files** providing additional modularization and transparency of the configuration data itself.
@@ -32,7 +32,7 @@ The loading of configuration files is done via following code:
 
     IContext context = ContextLoader.loadContext(strPath);
 
-With that the configuration context is loaded including all other importes files (references in the root file) and can be used to inflate runtime modules. Typically a root file would look like this:
+With that the configuration context is loaded including all other imported files (references in the root file) and can be used to inflate runtime modules. Typically a root file would look like this:
 
 ...XML...
 
